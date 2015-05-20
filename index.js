@@ -19,17 +19,21 @@ function myexpress(){
         }
       } else {
       	i++;
-        if (err && m.length == 4) {
-          m(err, req, res, next);
-        } else if (!err && m.length != 4) {
-          try {
+      	if(err){
+          if(m.length == 4){  
+            m(err, req, res, next);
+          }else{
+            next(err);
+          }
+      	}else if(!err && m.length == 4){
+      		next();
+      	}else {
+      		try {
             m(req, res, next);
           } catch (ex) {
             next(ex);
           }
-        } else {
-          next(err);
-        }
+      	}
       }
 
     }
