@@ -3,6 +3,7 @@ var http = require("http");
 var request = require("supertest");
 var expect = require("chai").expect;
 
+
 describe("app",function(){
 	var app = express();
   describe("create http server",function(){
@@ -176,6 +177,71 @@ describe("app",function(){
 	  	request(app).get("/").expect("m1 error").end();
 	  });
 
+	});
+
+	describe("Layer class and the match method.",function(){
+		var layer, fn;
+		var Layer = require('../lib/layer');
+	  beforeEach(function() {
+	    fn = function(){};
+	    layer = new Layer("/foo",fn);
+	  });
+
+	  it("sets layer.handle to be the middleware",function(){
+	  	expect(layer.handle).to.be.equal(fn);
+	  });
+
+	  it("returns undefined if path doesn't match",function(){
+	  	expect(layer.match("/bar")).to.be.undefined;
+	  });
+
+	  it("returns matched path if layer matches the request path exactly",function(){
+    	var match = layer.match("/foo");
+    	expect(match).to.not.be.undefined;
+    	expect(match).to.have.property("path","/foo");
+	  });
+
+	  it("returns matched prefix if the layer matches the prefix of the request path",function(){
+    	var match = layer.match("/foo");
+    	expect(match).to.not.be.undefined;
+    	expect(match).to.have.property("path","/foo");
+	  });
+
+	});
+
+	describe("app.use should add a Layer to stack",function(){
+		var layer, fn, app;
+		var Layer = require('../lib/layer');
+	  beforeEach(function() {
+	  	app = new myexpress();
+	    fn = function(){};
+	    layer = new Layer("/foo",fn);
+	  });
+	  it("first layer's path should be /",function(){
+
+	  });
+
+	  it("second layer's path should be /foo",function(){
+
+	  });
+	});
+
+
+	describe("The middlewares called should match request path",function(){
+		var layer, fn, app;
+		var Layer = require('../lib/layer');
+	  beforeEach(function() {
+	  	app = new myexpress();
+	    fn = function(){};
+	    layer = new Layer("/foo",fn);
+	  });
+	  it("returns root for GET /",function(){
+
+	  });
+
+	  it("second layer's path should be /foo",function(){
+
+	  });
 	});
 
 });
