@@ -4,43 +4,38 @@ var http = require("http");
 
 
 function myexpress(){
-	var app = function(req, res, next){
-		var i = 0;
-		var next = function(err){
-			var m = app.stack[i];
-			i++;
-			if(err){
-				if(i >= app.stack.length){
-					if(m && m.length == 4){
-						m(err,req,res,next);
-					}else{
-						res.statusCode = 500;
-					}
-					return;
-				}else{
-					next(err);
-				}
-			}
+	var app = function(req, res, next2) {
+    var i = 0;
 
-			if(m === undefined){
-				res.statusCode = 404;
-				return;
-			}
+    function next(err) {
+      var m = app.stack[i];
 
-			if(!err && m.length == 4){
-				next();
-			}else{
-				try{
-					m(req,res,next);
-				}catch(ex){
-					next(ex);
-				}
-			}
-		}
-		next();
-		res.end();
-	};
+      if (i >= app.stack.length) {
+        if (next2) {
+          next2(err);
+        } else {
+          res.statusCode = err ? 500 : 404;
+          res.end();          
+        }
+      } else {
+      	i++;
+        if (err && m.length == 4) {
+          m(err, req, res, next);
+        } else if (!err && m.length != 4) {
+          try {
+            m(req, res, next);
+          } catch (ex) {
+            next(ex);
+          }
+        } else {
+          next(err);
+        }
+      }
 
+    }
+
+    next();
+  };
 
 
 	app.stack = [];
