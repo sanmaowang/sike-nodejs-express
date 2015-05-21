@@ -6,7 +6,7 @@ var Layer = require("./lib/layer");
 function myexpress(){
 	var app = function(req, res, next2) {
     var i = 0;
-
+    req.params = {};
     function next(err) {
         if (i >= app.stack.length) {
           if (next2) {
@@ -20,6 +20,7 @@ function myexpress(){
           var m = layer.handle;
           i++;
           if(layer.match(req.url)){
+            req.params = layer.match(req.url).params;
             try{
               if(err && m.length == 4){
                 m(err, req, res, next);
