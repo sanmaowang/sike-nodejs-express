@@ -2,6 +2,9 @@ module.exports = myexpress;
 
 var http = require("http");
 var Layer = require("./lib/layer");
+var Route = require('./lib/route');
+var methods = require("methods");
+
 
 function myexpress(){
   var app = function(req, res, next){
@@ -66,6 +69,21 @@ function myexpress(){
     }
     app.stack.push(layer);
 	}
+
+  // app.get = function(path, handler){
+  //   var m = new Route("get", handler);
+  //   var layer = new Layer(path, m, {end:true});
+  //   app.stack.push(layer);
+  // }
+
+  methods.forEach(function(method){
+    app[method] = function(path, handler){
+      var m = new Route(method, handler);
+      var layer = new Layer(path, m, {end:true});
+      app.stack.push(layer);
+    }
+  });
+
 	app.listen = function(port, done){
 		var server = http.createServer(app);
 		server.listen(port, done);
