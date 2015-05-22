@@ -4,9 +4,14 @@ var http = require("http");
 var Layer = require("./lib/layer");
 
 function myexpress(){
-	var app = function(req, res, next2) {
+  var app = function(req, res, next){
+    app.handle(req, res, next);
+  }
+
+	app.handle = function(req, res, next2) {
     var i = 0;
     req.params = {};
+
     function next(err) {
         if (i >= app.stack.length) {
           if (next2) {
@@ -19,8 +24,12 @@ function myexpress(){
           var layer = app.stack[i];
           var m = layer.handle;
           i++;
+
           if(layer.match(req.url)){
             req.params = layer.match(req.url).params;
+            if(layer.isSubapp && req.url != layer.path){
+              req.url = req.url.replace(layer.path,"");
+            }
             try{
               if(err && m.length == 4){
                 m(err, req, res, next);
@@ -41,7 +50,6 @@ function myexpress(){
     next();
   };
 
-
 	app.stack = [];
 
 	app.use = function(m){
@@ -53,6 +61,9 @@ function myexpress(){
       m = arguments[1];
     }
     var layer = new Layer(url,m);
+    if(layer.isSubapp){
+      m.layer = layer;
+    }
     app.stack.push(layer);
 	}
 	app.listen = function(port, done){
