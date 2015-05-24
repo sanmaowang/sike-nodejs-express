@@ -76,11 +76,18 @@ function myexpress(){
   //   app.stack.push(layer);
   // }
 
+  app.route = function(path){
+    var router = new Route();
+    var layer = new Layer(path, router, {end:true});
+    app.stack.push(layer);
+    return router;
+  }
+
   methods.forEach(function(method){
     app[method] = function(path, handler){
       var m = new Route(method, handler);
-      var layer = new Layer(path, m, {end:true});
-      app.stack.push(layer);
+      app.route(path)[method](handler);
+      return app;
     }
   });
 
@@ -89,5 +96,6 @@ function myexpress(){
 		server.listen(port, done);
 		return server;
 	};
+
 	return app;
 }
