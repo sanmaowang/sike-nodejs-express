@@ -3,6 +3,7 @@ module.exports = myexpress;
 var http = require("http");
 var Layer = require("./lib/layer");
 var Route = require('./lib/route');
+var inject = require('./lib/injector');
 var methods = require("methods");
 
 
@@ -81,6 +82,16 @@ function myexpress(){
     var layer = new Layer(path, router, {end:true});
     app.stack.push(layer);
     return router;
+  }
+
+  app._factories = {};
+
+  app.inject = function(fn){
+    return inject(fn,app);
+  }
+
+  app.factory = function(name,handler){
+    app._factories[name] = handler;
   }
 
   methods.forEach(function(method){
