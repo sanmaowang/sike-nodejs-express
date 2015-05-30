@@ -6,14 +6,29 @@ var Route = require('./lib/route');
 var inject = require('./lib/injector');
 var methods = require("methods");
 
+var request = require('./lib/request');
+var response = require('./lib/response');
+
 
 function myexpress(){
   var app = function(req, res, next){
-    app.handle(req, res, next);
+    app.monkey_patch(req,res);
+    if(next){
+        var parentApp = req.app;
+        req.app = app;
+        app.handle(req, res, function(err) {
+            req.app = parentApp;
+            next(err);
+        });
+    } else {
+        req.app = app;
+        app.handle(req, res, next);
+    }
   }
 
 	app.handle = function(req, res, next2) {
     var i = 0;
+
     req.params = {};
 
     function next(err) {
@@ -101,6 +116,14 @@ function myexpress(){
       return app;
     }
   });
+
+  app.monkey_patch = function(req, res) {
+    req.__proto__ = request(req,app);
+    res.__proto__ = response(res);
+    req.res = res;
+    res.req = req;
+  }
+
 
 	app.listen = function(port, done){
 		var server = http.createServer(app);
