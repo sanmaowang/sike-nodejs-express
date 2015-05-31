@@ -36,7 +36,11 @@ function myexpress(){
           if (next2) {
             next2(err);
           } else {
-            res.statusCode = err ? 500 : 404;
+            if(err){
+              res.statusCode = err.statusCode || 500;
+            }else{
+              res.statusCode = 404;
+            }
             res.end();          
           }
         } else {
